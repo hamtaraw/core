@@ -1,0 +1,27 @@
+{
+    "name": "hamtaraw/core",
+    "description": "Build microservices applications",
+    "license": "MIT",
+    "keywords": ["hamtaraw", "framework", "microservice", "middleware"],
+
+    "autoload": {
+        "psr-4": {
+            "Hamtaraw\\": "src/"
+        }
+    },
+
+    "authors": [
+        {
+            "name": "Phil'dy Jocelyn Belcou",
+            "email": "pj.belcou@gmail.com",
+            "homepage": "https://github.com/cejobelo",
+            "role": "Developer"
+        }
+    ],
+
+    "require": {
+        "ext-json": "*",
+        "twig/twig": "^2.0.0",
+        "coercive/render": "^0.1.1"
+    }
+}
