@@ -70,11 +70,6 @@ abstract class AbstractMicroservice
         {
             throw new Exception("Invalid microservice type : $iType");
         }
-
-        if ($this->bShowLog)
-        {
-            error_log("[Hamtaraw src/{$this->getId()}] microservice is loaded");
-        }
     }
 
     /**
