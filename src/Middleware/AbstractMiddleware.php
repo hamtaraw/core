@@ -43,6 +43,10 @@ abstract class AbstractMiddleware
     {
         $this->aInputs = array_merge($_GET, $_POST, json_decode(file_get_contents("php://input"), true) ?: []);
 
+        $this->Microservice = $Microservice;
+
+        $this->Modules = new Modules($Microservice);
+
         foreach ($this->InputConfigs() as $ParamConfig)
         {
             if (array_key_exists($ParamConfig->getName(), $this->aInputs))
@@ -59,9 +63,6 @@ abstract class AbstractMiddleware
                 return;
             }
         }
-
-        $this->Microservice = $Microservice;
-        $this->Modules = new Modules($Microservice);
     }
 
     /**

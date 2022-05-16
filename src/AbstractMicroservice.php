@@ -45,6 +45,7 @@ abstract class AbstractMicroservice
     {
         $this->sBasepath = realpath(getcwd() . '/..');
         $this->iType = $iType;
+        $this->bShowLog = true;
 
         if ($iType === static::SRC)
         {
@@ -70,8 +71,10 @@ abstract class AbstractMicroservice
             throw new Exception("Invalid microservice type : $iType");
         }
 
-        error_log("Microservice basepath -> $this->sBasepath");
-        error_log("Microservice type -> $this->iType");
+        if ($this->bShowLog)
+        {
+            error_log("[Hamtaraw src/{$this->getId()}] microservice is loaded");
+        }
     }
 
     /**
@@ -223,7 +226,8 @@ abstract class AbstractMicroservice
      */
     public function getId()
     {
-        return preg_replace('`(.+\\\\)[a-zA-Z0-9]+$`', '', static::class);
+        preg_match('`(.+\\\\)[a-zA-Z0-9]+$`', static::class, $aMatches);
+        return str_replace($aMatches[1], '', static::class);
     }
 
     /**

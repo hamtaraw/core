@@ -116,7 +116,7 @@ class Modules
             else if (class_exists($sHamtarawModuleNamespace))
             {
                 /** @var AbstractModule $Module */
-                $Module = new $sHamtarawModuleNamespace($this->Microservice);
+                $Module = new $sHamtarawModuleNamespace($this->Microservice, $this);
             }
 
             else
