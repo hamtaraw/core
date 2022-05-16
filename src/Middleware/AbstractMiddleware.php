@@ -42,10 +42,28 @@ abstract class AbstractMiddleware
     public function __construct(AbstractMicroservice $Microservice)
     {
         $this->aInputs = array_merge($_GET, $_POST, json_decode(file_get_contents("php://input"), true) ?: []);
-
         $this->Microservice = $Microservice;
-
         $this->Modules = new Modules($Microservice);
+    }
+
+    /**
+     * Running the middleware.
+     *
+     * @return bool|void
+     */
+    abstract public function process();
+
+    /**
+     * Check the middleware request.
+     *
+     * @return bool|void
+     */
+    protected function checkRequest()
+    {
+        if ($this->Microservice->showLog())
+        {
+            error_log("[Hamtarow src/{$this->Microservice->getId()}] running {$this->getId()} middleware");
+        }
 
         foreach ($this->InputConfigs() as $ParamConfig)
         {
@@ -64,13 +82,6 @@ abstract class AbstractMiddleware
             }
         }
     }
-
-    /**
-     * Running the middleware.
-     *
-     * @return bool|void
-     */
-    abstract public function process();
 
     /**
      * Configure your inputs.
