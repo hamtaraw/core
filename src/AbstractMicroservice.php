@@ -47,6 +47,14 @@ abstract class AbstractMicroservice
         $this->iType = $iType;
         $this->bShowLog = true;
 
+        if ($this->showLog())
+        {
+            error_log("Running Hamtaraw microservice : {$this->getId()}");
+            error_log("Allowed middlewares [" . ($this->getMiddlewares() ? implode(' | ', $this->getMiddlewares()) : 'n/a') . ']');
+            error_log("Allowed components [" . ($this->getComponents() ? implode(' | ', $this->getComponents()) : 'n/a') . ']');
+            error_log("Allowed microservices [" . ($this->getMicroservices() ? implode(' | ', $this->getMicroservices()) : 'n/a') . ']');
+        }
+
         if ($iType === static::SRC)
         {
             foreach ($this->getMicroservices() as $sMicroservice)

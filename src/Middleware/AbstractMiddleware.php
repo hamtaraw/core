@@ -62,7 +62,7 @@ abstract class AbstractMiddleware
     {
         if ($this->Microservice->showLog())
         {
-            error_log("[Hamtarow src/{$this->Microservice->getId()}] running {$this->getId()} middleware");
+            error_log("Running Hamtaraw middleware : {$this->getId()}");
         }
 
         foreach ($this->InputConfigs() as $ParamConfig)
@@ -111,6 +111,7 @@ abstract class AbstractMiddleware
      */
     public function getId()
     {
-        return preg_replace('`(.+\\\\)[a-zA-Z0-9]+$`', '', static::class);
+        preg_match('`(.+\\\\)[a-zA-Z0-9]+$`', static::class, $aMatches);
+        return str_replace($aMatches[1], '', static::class);
     }
 }
