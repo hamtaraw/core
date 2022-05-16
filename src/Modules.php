@@ -19,11 +19,28 @@ use Hamtaraw\Module\Ui;
 class Modules
 {
     /**
+     * Microservice context.
+     *
+     * @var AbstractMicroservice|null
+     */
+    private ?AbstractMicroservice $Microservice;
+
+    /**
      * Modules.
      *
      * @var AbstractModule[] $Modules
      */
     private array $Modules = [];
+
+    /**
+     * The constructor.
+     *
+     * @param AbstractMicroservice $Microservice
+     */
+    public function __construct(AbstractMicroservice $Microservice)
+    {
+        $this->Microservice = $Microservice;
+    }
 
     /**
      * Returns the Head module instance.
@@ -87,17 +104,19 @@ class Modules
                 return $this->Modules[$sModuleName];
             }
 
-            $sAppModuleNamespace = "AbstractApp\\Module\\$sModuleName";
-            $sHamtaroModuleNamespace = "Hamtaraw\\Module\\$sModuleName";
+            $sCustomModuleNamespace = "Hamtaraws\\{$this->Microservice->getId()}\\Module\\$sModuleName";
+            $sHamtarawModuleNamespace = "Hamtaraw\\Module\\$sModuleName";
 
-            if (class_exists($sAppModuleNamespace))
-            { # This module is overrided
-                $Module = new $sAppModuleNamespace($this);
+            if (class_exists($sCustomModuleNamespace))
+            {
+                /** @var AbstractModule $Module */
+                $Module = new $sCustomModuleNamespace($this->Microservice, $this);
             }
 
-            else if (class_exists($sHamtaroModuleNamespace))
-            { # This module isn't overrided, use the default class
-                $Module = new $sHamtaroModuleNamespace($this);
+            else if (class_exists($sHamtarawModuleNamespace))
+            {
+                /** @var AbstractModule $Module */
+                $Module = new $sHamtarawModuleNamespace($this->Microservice);
             }
 
             else

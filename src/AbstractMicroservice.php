@@ -2,6 +2,7 @@
 namespace Hamtaraw;
 
 use Exception;
+use Hamtaraw\Component\AbstractPage;
 use Hamtaraw\Contributor\AbstractContributor;
 use Hamtaraw\Middleware\AbstractMiddleware;
 
@@ -29,6 +30,13 @@ abstract class AbstractMicroservice
     protected int $iType;
 
     /**
+     * Show the log.
+     *
+     * @var bool
+     */
+    protected bool $bShowLog;
+
+    /**
      * The constructor.
      *
      * @throws Exception
@@ -52,7 +60,7 @@ abstract class AbstractMicroservice
             foreach ($this->getMiddlewares() as $sMiddleware)
             {
                 /** @var AbstractMiddleware $Middleware */
-                $Middleware = new $sMiddleware($this, new Modules);
+                $Middleware = new $sMiddleware($this);
                 $Middleware->process();
             }
         }
@@ -117,6 +125,47 @@ abstract class AbstractMicroservice
     }
 
     /**
+     * Returns true if you want to have a trace of what happens.
+     * (error_log is used).
+     *
+     * @param bool $bShow
+     * @return bool|$this
+     */
+    public function showLog(bool $bShow = null)
+    {
+        if (is_null($bShow))
+        {
+            return $this->bShowLog;
+        }
+
+        $this->bShowLog = $bShow;
+        return $this;
+    }
+
+    /**
+     * Returns the pages instances.
+     *
+     * @return AbstractPage[]
+     */
+    public function getPages()
+    {
+        $Pages = [];
+
+        foreach ($this->getMiddlewares() as $sMiddleware)
+        {
+            /** @var AbstractMiddleware $Middleware */
+            $Middleware = new $sMiddleware($this);
+
+            if ($Middleware instanceof AbstractPage)
+            {
+                $Pages[] = $Middleware;
+            }
+        }
+
+        return $Pages;
+    }
+
+    /**
      * Returns true if the namespace is allowed to be loaded.
      *
      * @param string $sNamespace
@@ -165,6 +214,16 @@ abstract class AbstractMicroservice
     public function getTmpDir()
     {
         return sys_get_temp_dir();
+    }
+
+    /**
+     * Returns microservice's id.
+     *
+     * @return string
+     */
+    public function getId()
+    {
+        return preg_replace('`(.+\\\\)[a-zA-Z0-9]+$`', '', static::class);
     }
 
     /**

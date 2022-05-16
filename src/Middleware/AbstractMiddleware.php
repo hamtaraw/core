@@ -61,7 +61,7 @@ abstract class AbstractMiddleware
         }
 
         $this->Microservice = $Microservice;
-        $this->Modules = new Modules;
+        $this->Modules = new Modules($Microservice);
     }
 
     /**
@@ -90,5 +90,15 @@ abstract class AbstractMiddleware
     public function getNamespace()
     {
         return static::class;
+    }
+
+    /**
+     * Returns middleware's id.
+     *
+     * @return string
+     */
+    public function getId()
+    {
+        return preg_replace('`(.+\\\\)[a-zA-Z0-9]+$`', '', static::class);
     }
 }
