@@ -4,6 +4,7 @@ namespace Hamtaraw\Module;
 use Coercive\Utility\Render\RenderTwig;
 use Exception;
 use Hamtaraw\Component\AbstractComponent;
+use Hamtaraw\Component\AbstractPage;
 
 /**
  * The Ui module.
@@ -15,23 +16,35 @@ class Ui extends AbstractModule
     /**
      * Returns the Twig render instance.
      *
+     * @param AbstractComponent $Component
      * @return RenderTwig
      * @throws Exception
      */
-    public function RenderTwig()
+    public function RenderTwig(AbstractComponent $Component)
     {
-        return (new RenderTwig($this->Microservice->getSrc()))
+        return (new RenderTwig($Component->getMicroservice()->getSrc()))
             ->setCache(false, $this->Microservice->getTmpDir())
             ->addGlobals($this->getGlobalVariables())
-            ->addFunction('Component', function ($sId, array $aParams = [])
+            ->addFunction('Component', function ($sId) use ($Component)
             {
-                $sNamespace = "App\\Component\\$sId\\$sId";
-                preg_replace('`(\\\\.+)$`', "$1$1", $sNamespace);
-
-                # The controllers allowed to be loaded are specified in src/main.php
-                if (!$this->Microservice->isAllowed($sNamespace))
+                if (preg_match('`(.+):([a-zA-Z0-9]+)/([a-zA-Z0-9]+)$`', $sId, $aMatches))
                 {
-                    throw new Exception("Not allowed : $sNamespace");
+                    $sMicroservice = $aMatches[1];
+                    $sScope = $aMatches[2];
+                    $sClass = $aMatches[3];
+                    $sNamespace = "Hamtaraws\\$sMicroservice\\Component\\$sScope\\$sClass\\$sClass";
+                }
+
+                elseif (preg_match('`([a-zA-Z0-9]+)/([a-zA-Z0-9]+)$`', $sId, $aMatches))
+                {
+                    $sScope = $aMatches[1];
+                    $sClass = $aMatches[2];
+                    $sNamespace = "Hamtaraws\\{$Component->getMicroservice()::getId()}\\Component\\$sScope\\$sClass\\$sClass";
+                }
+
+                else
+                {
+                    throw new Exception("Invalid component identifier : $sId");
                 }
 
                 # The component class doesn't exist
@@ -40,10 +53,19 @@ class Ui extends AbstractModule
                     return "The component $sId doesn't exist.";
                 }
 
+                # The middlewares allowed to be loaded are specified in src/main.php
+                if (!$this->Microservice->isAllowed($sNamespace))
+                {
+                    throw new Exception("Not allowed : $sNamespace");
+                }
+
                 /** @var AbstractComponent $Component */
-                $Component = new $sNamespace($this->Microservice, $aParams);
+                $Component = new $sNamespace($this->Microservice, $Component->Microservices);
                 return $Component->getView();
-            })->addDirectory($this->Microservice->getTmpDir())->setFileExtension('.twig');
+            })
+            ->addDirectories($Component->getTwigPaths())
+            ->setFileExtension('.twig');
+            #->addDirectory($this->Microservice->getTmpDir())->setFileExtension('.twig');
     }
 
     /**
@@ -60,5 +82,16 @@ class Ui extends AbstractModule
                 'requestUri' => $this->Modules->Request()->getRequestUri(),
             ],
         ];
+    }
+
+    /**
+     * Returns the global variables for twig templates.
+     *
+     * @param AbstractPage $Page
+     * @return string
+     */
+    public function getPageUrl(AbstractPage $Page)
+    {
+        return $Page->Urls()[0]->getPath();
     }
 }

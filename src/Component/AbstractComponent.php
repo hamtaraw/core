@@ -2,6 +2,7 @@
 namespace Hamtaraw\Component;
 
 use Exception;
+use Hamtaraw\AbstractMicroservice;
 use Hamtaraw\Middleware\AbstractMiddleware;
 use JsonSerializable;
 
@@ -32,6 +33,21 @@ abstract class AbstractComponent extends AbstractMiddleware implements JsonSeria
      * @var array
      */
     protected array $aJs = [];
+
+    /**
+     * The constructor.
+     *
+     * @param AbstractMicroservice $Microservice
+     * @param AbstractMicroservice[]|null $Microservices
+     * @throws Exception
+     */
+    public function __construct(AbstractMicroservice $Microservice, array $Microservices = null)
+    {
+        parent::__construct($Microservice, $Microservices);
+        $this->Wrapper = (new Wrapper([
+            'class' => 'hamtaro-component',
+        ]));
+    }
 
     /**
      * Returns the twig template of the component.
@@ -75,6 +91,44 @@ abstract class AbstractComponent extends AbstractMiddleware implements JsonSeria
     }
 
     /**
+     * Returns Wrapper.
+     *
+     * @return Wrapper
+     */
+    public function Wrapper()
+    {
+        return new Wrapper;
+    }
+
+    /**
+     * Returns component's type.
+     *
+     * @return string
+     */
+    public function getType()
+    {
+        preg_match('`Hamtaraws\\\\[a-zA-Z0-9]+\\\\Component\\\\([a-zA-Z0-9]+)\\\\.+`', static::class, $aMatches);
+        return $aMatches[1];
+    }
+
+    /**
+     * Returns the microservice context.
+     *
+     * @return AbstractMicroservice[]|string[]
+     */
+    public function getTwigPaths()
+    {
+        $aTwigPaths = [];
+
+        foreach ($this->Microservices as $Microservice)
+        {
+            $aTwigPaths[] = $Microservice->getSrc();
+        }
+
+        return $aTwigPaths;
+    }
+
+    /**
      * Returns the filepath relative to the src dir with $bAbsolute to false.
      *
      * @param bool $bAbsolute
@@ -83,25 +137,15 @@ abstract class AbstractComponent extends AbstractMiddleware implements JsonSeria
      */
     public function getFilepath(bool $bAbsolute = false)
     {
-        $sFilename = (string) preg_replace("`Hamtaraw\\\\`", '', $this->getNamespace());
-        $sFilename = (string) preg_replace("`AbstractApp\\\\`", '', $sFilename);
-        $sFilename = (string) str_replace('\\', '/', $sFilename);
-        $sAppSrc = $this->Microservice->getSrc();
+        preg_match('`^Hamtaraws\\\\[a-zA-Z0-9]+\\\\(Component\\\\.+\\\\[a-zA-Z0-9]+)$`', static::class, $aMatches);
+        $sSrcFilepath = (string) str_replace('\\', '/', $aMatches[1]);
 
         if ($bAbsolute)
         {
-            if (is_file("$sAppSrc/$sFilename.php"))
-            {
-                $sFilename = "$sAppSrc/$sFilename";
-            }
-
-            else
-            {
-                throw new Exception("No php file for {$this->getNamespace()}");
-            }
+            return "{$this->Microservice->getSrc()}/$sSrcFilepath";
         }
 
-        return $sFilename;
+        return $sSrcFilepath;
     }
 
     /**
@@ -117,7 +161,7 @@ abstract class AbstractComponent extends AbstractMiddleware implements JsonSeria
         try
         {
             $sFilepath = $this->getFilepath();
-            $oRenderTwig = $this->Modules->Ui()->RenderTwig()->setDebug(false);
+            $oRenderTwig = $this->Modules->Ui()->RenderTwig($this)->setDebug(false);
 
             # All the data for the template
             $aData = array_merge($this->Modules->Ui()->getGlobalVariables(), $this->aView, $aData, ['Head' => $this->Modules->Head()]);
@@ -147,7 +191,7 @@ abstract class AbstractComponent extends AbstractMiddleware implements JsonSeria
                 return str_replace(
                     '<!--PAGE-->',
                     $sComponent,
-                    $oRenderTwig->setPath('Template/index.twig')->setDatas($aData)->render()
+                    $oRenderTwig->setPath('Component/Template/index.twig')->setDatas($aData)->render()
                 );
             }
 

@@ -18,9 +18,17 @@ abstract class AbstractMicroservice
 
     /**
      * Basepath of your Hamtaraw application.
+     *
      * @var string
      */
-    protected string $sBasepath;
+    protected string $sBasepath = '';
+
+    /**
+     * Basepath of your Hamtaraw application.
+     *
+     * @var string
+     */
+    protected string $sSrc = '';
 
     /**
      * Microservice's type.
@@ -37,47 +45,48 @@ abstract class AbstractMicroservice
     protected bool $bShowLog;
 
     /**
+     * Components's namespaces.
+     *
+     * @var string[]
+     */
+    protected array $aComponents = [];
+
+    /**
      * The constructor.
      *
      * @throws Exception
      */
     public function __construct(int $iType)
     {
-        $this->sBasepath = realpath(getcwd() . '/..');
         $this->iType = $iType;
         $this->bShowLog = true;
+        $this->sBasepath = realpath(getcwd() . '/..');
+        $this->aComponents = $this->getComponents();
 
-        if ($this->showLog())
+        if ($this->iType === static::SRC)
         {
-            error_log("Running Hamtaraw microservice : {$this->getId()}");
-            error_log("Allowed middlewares [" . ($this->getMiddlewares() ? implode(' | ', $this->getMiddlewares()) : 'n/a') . ']');
-            error_log("Allowed components [" . ($this->getComponents() ? implode(' | ', $this->getComponents()) : 'n/a') . ']');
-            error_log("Allowed microservices [" . ($this->getMicroservices() ? implode(' | ', $this->getMicroservices()) : 'n/a') . ']');
+            $this->sSrc = "$this->sBasepath/src";
         }
 
-        if ($iType === static::SRC)
+        else if ($this->iType === static::MICROSERVICE)
         {
-            foreach ($this->getMicroservices() as $sMicroservice)
-            {
-                /** @var AbstractMicroservice $Microservice */
-                $Microservice = new $sMicroservice(static::MICROSERVICE);
-            }
-        }
-
-        elseif ($iType === static::MICROSERVICE)
-        {
-            foreach ($this->getMiddlewares() as $sMiddleware)
-            {
-                /** @var AbstractMiddleware $Middleware */
-                $Middleware = new $sMiddleware($this);
-                $Middleware->process();
-            }
+            $this->sSrc = realpath("$this->sBasepath/vendor/hamtaraws/" . strtolower($this::getId()) . '/src');
         }
 
         else
         {
             throw new Exception("Invalid microservice type : $iType");
         }
+    }
+
+    /**
+     * Process the microservice.
+     *
+     * @return void
+     */
+    public function process()
+    {
+
     }
 
     /**
@@ -104,20 +113,13 @@ abstract class AbstractMicroservice
     abstract public function getMiddlewares();
 
     /**
-     * Returns the namespaces of the microservices allowed to be loaded.
-     *
-     * @return string[]
-     */
-    abstract public function getMicroservices();
-
-    /**
      * Returns the cache directory.
      *
      * @return string
      */
     public function getBasepath()
     {
-        return "src/Cache";
+        return $this->sBasepath;
     }
 
     /**
@@ -179,7 +181,7 @@ abstract class AbstractMicroservice
      */
     public function isAllowed(string $sNamespace)
     {
-        return in_array($sNamespace, array_merge($this->getComponents(), $this->getMiddlewares(), $this->getMicroservices()), true);
+        return in_array($sNamespace, array_merge($this->getComponents(), $this->getMiddlewares()), true);
     }
 
     /**
@@ -189,7 +191,7 @@ abstract class AbstractMicroservice
      */
     public function getCacheDir()
     {
-        return "src/Cache";
+        return "$this->sBasepath/src/Cache";
     }
 
     /**
@@ -199,7 +201,7 @@ abstract class AbstractMicroservice
      */
     public function getSrc()
     {
-        return "$this->sBasepath/src";
+        return $this->sSrc;
     }
 
     /**
@@ -227,10 +229,30 @@ abstract class AbstractMicroservice
      *
      * @return string
      */
-    public function getId()
+    public static function getId()
     {
         preg_match('`(.+\\\\)[a-zA-Z0-9]+$`', static::class, $aMatches);
         return str_replace($aMatches[1], '', static::class);
+    }
+
+    /**
+     * Returns true if if the src microservice.
+     *
+     * @return bool
+     */
+    public function isSrc()
+    {
+        return $this->iType === 20;
+    }
+
+    /**
+     * Returns type.
+     *
+     * @return int
+     */
+    public function getType()
+    {
+        return $this->iType;
     }
 
     /**

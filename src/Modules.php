@@ -104,7 +104,7 @@ class Modules
                 return $this->Modules[$sModuleName];
             }
 
-            $sCustomModuleNamespace = "Hamtaraws\\{$this->Microservice->getId()}\\Module\\$sModuleName";
+            $sCustomModuleNamespace = "Hamtaraws\\{$this->Microservice::getId()}\\Module\\$sModuleName";
             $sHamtarawModuleNamespace = "Hamtaraw\\Module\\$sModuleName";
 
             if (class_exists($sCustomModuleNamespace))

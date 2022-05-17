@@ -13,6 +13,20 @@ use Hamtaraw\Modules;
 abstract class AbstractMiddleware
 {
     /**
+     * The microservice id.
+     *
+     * @var string
+     */
+    public string $sMicroservice;
+
+    /**
+     * Microservices.
+     *
+     * @var AbstractMicroservice[]|null
+     */
+    public $Microservices;
+
+    /**
      * The microservice context.
      *
      * @var AbstractMicroservice $Microservice
@@ -37,13 +51,41 @@ abstract class AbstractMiddleware
      * The constructor.
      *
      * @param AbstractMicroservice $Microservice
+     * @param AbstractMicroservice[] $Microservices
      * @throws Exception
      */
-    public function __construct(AbstractMicroservice $Microservice)
+    public function __construct(AbstractMicroservice $Microservice, array $Microservices = null)
     {
         $this->aInputs = array_merge($_GET, $_POST, json_decode(file_get_contents("php://input"), true) ?: []);
+        $this->sMicroservice = $Microservice::getId();
         $this->Microservice = $Microservice;
         $this->Modules = new Modules($Microservice);
+        $this->Microservices = $Microservices;
+
+        if ($this->Microservice->showLog())
+        {
+            error_log("Middleware instanciation {$this::getId()}");
+        }
+    }
+
+    /**
+     * Returns the microservice context.
+     *
+     * @return AbstractMicroservice
+     */
+    public function getMicroservice()
+    {
+        return $this->Microservice;
+    }
+
+    /**
+     * Returns all microservices.
+     *
+     * @return AbstractMicroservice[]|string[]
+     */
+    public function getMicroservices()
+    {
+        return $this->Microservices;
     }
 
     /**
@@ -62,7 +104,7 @@ abstract class AbstractMiddleware
     {
         if ($this->Microservice->showLog())
         {
-            error_log("Running Hamtaraw middleware : {$this->getId()}");
+            error_log("Running middleware {$this::getId()}");
         }
 
         foreach ($this->InputConfigs() as $ParamConfig)
@@ -109,7 +151,7 @@ abstract class AbstractMiddleware
      *
      * @return string
      */
-    public function getId()
+    public static function getId()
     {
         preg_match('`(.+\\\\)[a-zA-Z0-9]+$`', static::class, $aMatches);
         return str_replace($aMatches[1], '', static::class);
