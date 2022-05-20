@@ -56,26 +56,25 @@ abstract class AbstractMicroservice
      *
      * @throws Exception
      */
-    public function __construct(int $iType)
+    public function __construct()
     {
-        $this->iType = $iType;
         $this->bShowLog = true;
         $this->sBasepath = realpath(getcwd() . '/..');
         $this->aComponents = $this->getComponents();
 
-        if ($this->iType === static::SRC)
+        if (is_dir("$this->sBasepath/microservice/" . strtolower($this::getId())))
         {
-            $this->sSrc = "$this->sBasepath/src";
+            $this->sSrc = "$this->sBasepath/microservice/{$this::getId()}";
         }
-
-        else if ($this->iType === static::MICROSERVICE)
+        
+        elseif (is_dir("$this->sBasepath/vendor/hamtaraws/" . strtolower($this::getId()) . '/src'))
         {
             $this->sSrc = realpath("$this->sBasepath/vendor/hamtaraws/" . strtolower($this::getId()) . '/src');
         }
 
         else
         {
-            throw new Exception("Invalid microservice type : $iType");
+            throw new Exception("Invalid microservice basepath");
         }
     }
 
@@ -113,23 +112,13 @@ abstract class AbstractMicroservice
     abstract public function getMiddlewares();
 
     /**
-     * Returns the cache directory.
+     * Returns the basepath directory.
      *
      * @return string
      */
     public function getBasepath()
     {
         return $this->sBasepath;
-    }
-
-    /**
-     * Returns the cache directory.
-     *
-     * @return string
-     */
-    public function getDir()
-    {
-        return "src/Cache";
     }
 
     /**
@@ -191,7 +180,7 @@ abstract class AbstractMicroservice
      */
     public function getCacheDir()
     {
-        return "$this->sBasepath/src/Cache";
+        return "$this->sBasepath/cache";
     }
 
     /**
@@ -202,16 +191,6 @@ abstract class AbstractMicroservice
     public function getSrc()
     {
         return $this->sSrc;
-    }
-
-    /**
-     * Returns the src.
-     *
-     * @return string
-     */
-    public function getSources()
-    {
-        return "$this->sBasepath/src";
     }
 
     /**
@@ -233,45 +212,5 @@ abstract class AbstractMicroservice
     {
         preg_match('`(.+\\\\)[a-zA-Z0-9]+$`', static::class, $aMatches);
         return str_replace($aMatches[1], '', static::class);
-    }
-
-    /**
-     * Returns true if if the src microservice.
-     *
-     * @return bool
-     */
-    public function isSrc()
-    {
-        return $this->iType === 20;
-    }
-
-    /**
-     * Returns type.
-     *
-     * @return int
-     */
-    public function getType()
-    {
-        return $this->iType;
-    }
-
-    /**
-     * Start as src microservice.
-     *
-     * @return AbstractMicroservice
-     */
-    static public function startSrc()
-    {
-        return new static(static::SRC);
-    }
-
-    /**
-     * Start as microservice.
-     *
-     * @return AbstractMicroservice
-     */
-    static public function startMicroservice()
-    {
-        return new static(static::MICROSERVICE);
     }
 }

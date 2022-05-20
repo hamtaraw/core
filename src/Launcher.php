@@ -17,6 +17,12 @@ class Launcher
      */
     public function __construct($Microservices)
     {
+        /** @var AbstractMicroservice[] $Microservices */
+        $Microservices = array_map(function ($sMicroservice)
+        {
+            return new $sMicroservice;
+        }, $Microservices);
+
         foreach ($Microservices as $Microservice)
         {
             if ($Microservice->showLog())
@@ -28,6 +34,12 @@ class Launcher
             {
                 /** @var AbstractMiddleware $Middleware */
                 $Middleware = new $sMiddleware($Microservice, $Microservices);
+
+                if ($Microservice->showLog())
+                {
+                    error_log("Running microservice {$Microservice::getId()}");
+                }
+
                 $Middleware->process();
             }
         }
