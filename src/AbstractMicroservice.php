@@ -69,7 +69,7 @@ abstract class AbstractMicroservice
         
         elseif (is_dir("$this->sBasepath/vendor/hamtaraw/" . strtolower($this::getId()) . '-microservice/src'))
         {
-            $this->sSrc = realpath("$this->sBasepath/vendor/hamtaraw/" . strtolower($this::getId()) . '/src');
+            $this->sSrc = "$this->sBasepath/vendor/hamtaraw/" . strtolower($this::getId()) . '-microservice/src';
         }
 
         else
