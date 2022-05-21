@@ -32,14 +32,14 @@ class Ui extends AbstractModule
                     $sMicroservice = $aMatches[1];
                     $sScope = $aMatches[2];
                     $sClass = $aMatches[3];
-                    $sNamespace = "Hamtaraws\\$sMicroservice\\Component\\$sScope\\$sClass\\$sClass";
+                    $sNamespace = "Hamtaraw\\Microservice\\$sMicroservice\\Component\\$sScope\\$sClass\\$sClass";
                 }
 
                 elseif (preg_match('`([a-zA-Z0-9]+)/([a-zA-Z0-9]+)$`', $sId, $aMatches))
                 {
                     $sScope = $aMatches[1];
                     $sClass = $aMatches[2];
-                    $sNamespace = "Hamtaraws\\{$Component->getMicroservice()::getId()}\\Component\\$sScope\\$sClass\\$sClass";
+                    $sNamespace = "Hamtaraw\\Microservice\\{$Component->getMicroservice()::getId()}\\Component\\$sScope\\$sClass\\$sClass";
                 }
 
                 else

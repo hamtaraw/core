@@ -18,7 +18,7 @@ abstract class AbstractForm extends AbstractComponent
     {
         $this->Wrapper->addAttrs([
             'method' => 'post',
-            'class' => 'hamtaro-form',
+            'class' => 'hamtaraw-form',
         ])->setTagName('form');
     }
 

@@ -66,7 +66,7 @@ abstract class AbstractModal extends AbstractComponent
         $this->aView['ComponentModal'] = $this;
 
         $this->Wrapper->addAttrs([
-            'class' => 'hamtaro-modal modal fade',
+            'class' => 'hamtaraw-modal modal fade',
             'data-modal-urlid' => $this->getUrlId(),
             'data-uipath' => $this->getUiPath(),
         ]);

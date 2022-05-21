@@ -45,7 +45,7 @@ abstract class AbstractComponent extends AbstractMiddleware implements JsonSeria
     {
         parent::__construct($Microservice, $Microservices);
         $this->Wrapper = (new Wrapper([
-            'class' => 'hamtaro-component',
+            'class' => 'hamtaraw-component',
         ]));
     }
 
@@ -107,7 +107,7 @@ abstract class AbstractComponent extends AbstractMiddleware implements JsonSeria
      */
     public function getType()
     {
-        preg_match('`Hamtaraws\\\\[a-zA-Z0-9]+\\\\Component\\\\([a-zA-Z0-9]+)\\\\.+`', static::class, $aMatches);
+        preg_match('`Hamtaraw\\\\Microservice\\\\[a-zA-Z0-9]+\\\\Component\\\\([a-zA-Z0-9]+)\\\\.+`', static::class, $aMatches);
         return $aMatches[1];
     }
 
@@ -137,7 +137,7 @@ abstract class AbstractComponent extends AbstractMiddleware implements JsonSeria
      */
     public function getFilepath(bool $bAbsolute = false)
     {
-        preg_match('`^Hamtaraws\\\\[a-zA-Z0-9]+\\\\(Component\\\\.+\\\\[a-zA-Z0-9]+)$`', static::class, $aMatches);
+        preg_match('`^Hamtaraw\\\\Microservice\\\\[a-zA-Z0-9]+\\\\(Component\\\\.+\\\\[a-zA-Z0-9]+)$`', static::class, $aMatches);
         $sSrcFilepath = (string) str_replace('\\', '/', $aMatches[1]);
 
         if ($bAbsolute)
